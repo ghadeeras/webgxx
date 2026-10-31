@@ -1,6 +1,8 @@
 # webgxx
 *Or WebG(PU / L2)*
 
+![ci-build](https://github.com/ghadeeras/webgxx/workflows/ci-build/badge.svg)
+
 This is an attempt to **partially** implement a **subset** of the WebGPU specification on top og WebGL2 😅
 
 ## ⚠️ Important ⚠️ 

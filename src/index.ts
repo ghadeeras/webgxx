@@ -1,6 +1,8 @@
 import { GLWebGPU, UserAgentWebGPU, type WebGPU } from "./api.js"
 import { polyfill } from "./polyfill.js"
 
+export type { WebGPU } from "./api.js"
+
 polyfill()
 
 /*

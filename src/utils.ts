@@ -70,6 +70,10 @@ export function optional<T, R>(value: T | undefined, mapper: (v: T) => R) {
     return value !== undefined && value !== null ? required(value, mapper) : undefined
 }
 
+export function alignTo(alignment: number, size: number) {
+    return Math.ceil(size / alignment) * alignment
+}
+
 export type SparseArray<T> = (T | undefined)[]
 
 export type GLIndexBufferBinding = {

@@ -1,5 +1,5 @@
 import type { GLDevice } from "./device.js";
-import { expect, GL, type DeepRequired } from "./utils.js";
+import { alignTo, expect, GL, type DeepRequired } from "./utils.js";
 
 export class GLBuffer implements GPUBuffer {
 
@@ -11,7 +11,7 @@ export class GLBuffer implements GPUBuffer {
     readonly target: GLenum = bufferTarget(this.descriptor.usage)
 
     private constructor(readonly device: GLDevice, readonly descriptor: DeepRequired<GPUBufferDescriptor>) {
-        this.whileBound(() => this.device.context.bufferData(this.target, descriptor.size, usage(this.usage)))
+        this.whileBound(() => this.device.context.bufferData(this.target, alignTo(16, descriptor.size), usage(this.usage)))
     }
 
     static create(device: GLDevice, descriptor: GPUBufferDescriptor) {

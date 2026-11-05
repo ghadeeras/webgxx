@@ -77,6 +77,9 @@ function es300Code(code: string) {
 
 function es300Wrap(type: string, code: string) {
     return `#version 300 es
-    ${type === "FRAGMENT_SHADER" ? "precision highp float;" : ""}
+    ${type === "FRAGMENT_SHADER" ? `
+        precision highp float;
+        precision highp int;
+    ` : ""}
     ${code}`
 }

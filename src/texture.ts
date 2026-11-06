@@ -104,7 +104,7 @@ export abstract class GLTexture<T extends WebGLTexture | WebGLRenderbuffer = any
         }
     }
 
-    blit(from: [number, number], target: GLTexture<T> | null, to: [number, number], size: [number, number]): void {
+    blit(from: [number, number], target: GLTexture<T> | WebGLFramebuffer | null, to: [number, number], size: [number, number]): void {
         const gl = this.device.context
         const blit = () => gl.blitFramebuffer(
             from[0], from[1], from[0] + size[0], from[1] + size[1],
@@ -112,10 +112,10 @@ export abstract class GLTexture<T extends WebGLTexture | WebGLRenderbuffer = any
             GL.COLOR_BUFFER_BIT, GL.NEAREST
         )
         this.asSource(0, 0, () => {
-            if (target != null) {
+            if (target != null && target instanceof GLTexture) {
                 target.asDestination(0, 0, blit)
             } else {
-                gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, null)
+                gl.bindFramebuffer(GL.DRAW_FRAMEBUFFER, target)
                 blit()
             }
         })

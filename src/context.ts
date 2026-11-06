@@ -2,20 +2,20 @@ import { GLDevice } from "./device.js"
 import { GLTexture } from "./texture.js"
 import { cast, expect } from "./utils.js"
 
-export class GLCanvasContext implements GPUCanvasContext {
+abstract class GLCanvasContextBase implements GPUCanvasContext {
 
     private configuration: GPUCanvasConfigurationOut | null = null
     private texture: GLTexture | null = null
 
-    constructor(canvas: HTMLCanvasElement | OffscreenCanvas) {
-        this.canvas = canvas
-    }
+    abstract width: number
+    abstract height: number
+    abstract framebuffer: WebGLFramebuffer | null
 
     /* vvvvvvvvvvvvvvvv PUBLIC API vvvvvvvvvvvvvvvv */
     
     readonly __brand = "GPUCanvasContext"
 
-    readonly canvas: HTMLCanvasElement | OffscreenCanvas
+    abstract canvas: HTMLCanvasElement | OffscreenCanvas
 
     configure(configuration: GPUCanvasConfiguration): undefined {
         if (!(configuration.device instanceof GLDevice)) {
@@ -40,32 +40,82 @@ export class GLCanvasContext implements GPUCanvasContext {
     }
 
     getCurrentTexture(): GPUTexture {
-        if (this.texture !== null && this.texture.width === this.canvas.width && this.texture.height === this.canvas.height) {
+        if (this.texture !== null && this.texture.width === this.width && this.texture.height === this.height) {
             return this.texture
         } else if (this.texture !== null) {
             this.texture.destroy()
             this.texture = null
         }
         if (this.configuration === null) {
-            return expect("Configured canvas")
+            return expect("Configured context")
         }
         const device = cast(this.configuration.device, GLDevice)
         const texture = cast(device.createTexture({
             format: this.configuration.format,
-            size: [this.canvas.width, this.canvas.height],
+            size: [this.width, this.height],
             usage: this.configuration.usage,
         }), GLTexture)
         texture.onDoneRendering = (t, viewport) => {
             const [x, y, w, h] = viewport
-            t.blit([x, y], null, [x, y], [w, h])
+            t.blit([x, y], this.framebuffer, [x, y], [w, h])
         }
         return this.texture = texture
     }
 
     unconfigure(): undefined {
         this.configuration = null
+        this.texture = null
     }
 
     /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
     
+}
+
+export class GLCanvasContext extends GLCanvasContextBase {
+
+    constructor(readonly canvas: HTMLCanvasElement | OffscreenCanvas) {
+        super()
+    }
+
+    readonly framebuffer: WebGLFramebuffer | null = null
+
+    get width(): number {
+        return this.canvas.width
+    }
+
+    get height(): number {
+        return this.canvas.height
+    }
+
+}
+
+export class GPUExtendedRealityContext extends GLCanvasContextBase {
+
+    private constructor(readonly baseLayer: XRWebGLLayer, readonly device: GLDevice) {
+        super()
+    }
+
+    static async create(xrSession: XRSession, device: GPUDevice) {
+        const glDevice = cast(device, GLDevice)
+        const baseLayer = new XRWebGLLayer(xrSession, glDevice.context)
+        await xrSession.updateRenderState({ baseLayer })
+        return new GPUExtendedRealityContext(baseLayer, glDevice)
+    }
+
+    get canvas() {
+        return this.device.adapter.gpu.canvas
+    }
+
+    get framebuffer(): WebGLFramebuffer | null {
+        return this.baseLayer.framebuffer
+    }
+
+    get width(): number {
+        return this.baseLayer.framebufferWidth
+    }
+
+    get height(): number {
+        return this.baseLayer.framebufferHeight
+    }
+
 }

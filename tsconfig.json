@@ -9,7 +9,10 @@
     // See also https://aka.ms/tsconfig/module
     "module": "es2015",
     "target": "es2015",
-    "types": ["@webgpu/types"],
+    "types": [
+      "@webgpu/types",
+      "@types/webxr"
+    ],
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

@@ -1,4 +1,5 @@
 import { GLWebGPU, UserAgentWebGPU, type WebGPU } from "./api.js"
+import { GPUExtendedRealityContext } from "./context.js"
 import { GLDevice } from "./device.js"
 import { polyfill } from "./polyfill.js"
 
@@ -17,8 +18,12 @@ export function glWebGPU(canvas: HTMLCanvasElement): WebGPU {
     return new GLWebGPU(canvas)
 }
 
-export function xrContext(device: GPUDevice): WebGL2RenderingContext | null {
-    return device instanceof GLDevice && device.adapter.options.xrCompatible ? device.context : null
+export function xrCompatible(device: GPUDevice): boolean {
+    return device instanceof GLDevice && device.adapter.options.xrCompatible
+}
+
+export async function xrContext(xrSession: XRSession, device: GPUDevice): Promise<GPUCanvasContext>{
+    return await GPUExtendedRealityContext.create(xrSession, device)
 }
 
 export function glContext(device: GPUDevice): WebGL2RenderingContext | null {

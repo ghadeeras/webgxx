@@ -97,7 +97,11 @@ export class GPUExtendedRealityContext extends GLCanvasContextBase {
 
     static async create(xrSession: XRSession, device: GPUDevice) {
         const glDevice = cast(device, GLDevice)
-        const baseLayer = new XRWebGLLayer(xrSession, glDevice.context)
+        const baseLayer = new XRWebGLLayer(xrSession, glDevice.context, {
+            antialias: false,
+            depth: false,
+            ignoreDepthValues: true,
+        })
         await xrSession.updateRenderState({ baseLayer })
         return new GPUExtendedRealityContext(baseLayer, glDevice)
     }
